@@ -41,11 +41,11 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Load CSS from igetit-vr/ui/styles.css if available
+# Load base CSS if available
 def load_stylesheet() -> str:
     possible_paths = [
-        os.path.join(os.path.dirname(__file__), "igetit-vr", "ui", "styles.css"),
         os.path.join(os.path.dirname(__file__), "ui", "styles.css"),
+        os.path.join(os.path.dirname(__file__), "igetit-vr", "ui", "styles.css"),
     ]
     for p in possible_paths:
         if os.path.exists(p):
@@ -58,7 +58,7 @@ def load_stylesheet() -> str:
 
 base_css = load_stylesheet()
 
-# Custom styles + Streamlit UI Overrides to match localhost:3000 exactly and hide the sidebar
+# Custom styles & layout overrides
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
@@ -76,59 +76,80 @@ st.markdown(f"""
     #MainMenu {{
         display: none !important;
     }}
-    
-    /* 2. BODY & WRAPPER RESET */
+    /* Hide header anchor links (the little link icon next to titles) */
+    a[href^="#"], [data-testid="stHeaderActionElements"] {{
+        display: none !important;
+    }}
+
+    /* 2. PAGE BACKGROUND & BASE CONTAINER RESET */
     .stApp {{
         background-color: #f8fafc !important;
-        font-family: 'Inter', sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }}
     .main .block-container {{
-        padding: 0 0 60px 0 !important;
-        max-width: 100% !important;
+        padding-top: 86px !important;
+        padding-bottom: 64px !important;
+        max-width: 1040px !important;
+        margin: 0 auto !important;
     }}
 
-    /* 3. BASE DESIGN SYSTEM INJECTION */
+    /* 3. BASE CSS FROM ORIGINAL REPOSITORY */
     {base_css}
 
-    /* 4. STREAMLIT WIDGET OVERRIDES TO MATCH LOCALHOST:3000 */
-    .custom-main-wrapper {{
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 32px 20px 48px;
+    /* 4. FULL-WIDTH FIXED TOP NAVBAR */
+    .top-navbar-fixed {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100vw;
+        height: 64px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 999999;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+        box-sizing: border-box;
     }}
 
-    /* Card styling */
-    .st-card-container {{
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 28px;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
-        margin-bottom: 24px;
+    /* 5. UNIFIED CARD CONTAINER OVERRIDE */
+    div[data-testid="stVerticalBlockBorderWrapper"] {{
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 24px 28px !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+        margin-bottom: 24px !important;
     }}
 
-    .st-field-header {{
+    /* Field labels */
+    .field-header {{
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        font-weight: 600;
-        color: #0f172a;
         margin-bottom: 8px;
         font-size: 14px;
     }}
-    .st-field-sub {{
+    .field-title {{
+        font-weight: 600;
+        color: #0f172a;
+    }}
+    .field-sub {{
         font-size: 12px;
-        font-weight: 400;
         color: #64748b;
+        font-weight: 400;
     }}
 
-    /* File Uploader styling */
+    /* File Uploader */
     [data-testid="stFileUploader"] {{
         background-color: #f8fafc !important;
         border: 2px dashed #93c5fd !important;
         border-radius: 10px !important;
-        padding: 16px 20px !important;
-        transition: border-color 0.2s;
+        padding: 12px 18px !important;
+        transition: border-color 0.2s, background-color 0.2s;
     }}
     [data-testid="stFileUploader"]:hover {{
         border-color: #3b82f6 !important;
@@ -137,13 +158,9 @@ st.markdown(f"""
     [data-testid="stFileUploaderDropzone"] {{
         background: transparent !important;
         border: none !important;
-        padding: 10px !important;
-    }}
-    [data-testid="stFileUploader"] small {{
-        color: #64748b !important;
     }}
 
-    /* Textarea & Inputs */
+    /* Text inputs & Textarea */
     .stTextArea textarea {{
         background-color: #f1f5f9 !important;
         border: 1px solid #e2e8f0 !important;
@@ -174,25 +191,27 @@ st.markdown(f"""
         box-shadow: 0 0 0 3px rgba(27, 79, 216, 0.1) !important;
     }}
 
-    /* Button styling (Right aligned blue button with play icon) */
-    div.stButton {{
+    /* Right-aligned Primary Blue Button */
+    div[data-testid="stVerticalBlockBorderWrapper"] div.stButton {{
         display: flex !important;
         justify-content: flex-end !important;
-        margin-top: 16px !important;
+        margin-top: 18px !important;
+        margin-bottom: 0px !important;
     }}
-    div.stButton > button {{
-        background: #1b4fd8 !important;
+    div[data-testid="stVerticalBlockBorderWrapper"] div.stButton > button {{
+        background-color: #1b4fd8 !important;
         color: #ffffff !important;
         border-radius: 8px !important;
-        padding: 11px 26px !important;
+        padding: 10px 24px !important;
         font-weight: 600 !important;
         font-size: 15px !important;
         border: none !important;
         box-shadow: 0 4px 6px -1px rgba(27, 79, 216, 0.25) !important;
         transition: all 0.2s ease !important;
+        width: auto !important;
     }}
-    div.stButton > button:hover {{
-        background: #143eb3 !important;
+    div[data-testid="stVerticalBlockBorderWrapper"] div.stButton > button:hover {{
+        background-color: #143eb3 !important;
         transform: translateY(-1px);
         box-shadow: 0 6px 12px -2px rgba(27, 79, 216, 0.35) !important;
     }}
@@ -202,7 +221,7 @@ st.markdown(f"""
 
 def get_api_key() -> str:
     """Retrieve Gemini API key silently without showing any UI input."""
-    # 1. Streamlit Secrets (share.streamlit.io)
+    # 1. Streamlit Secrets
     try:
         if "GEMINI_API_KEY" in st.secrets:
             return str(st.secrets["GEMINI_API_KEY"]).strip()
@@ -318,7 +337,6 @@ Output ONLY valid JSON strictly matching the schema in the system prompt."""
         max_output_tokens=8192
     )
 
-    # Use active Free Tier model (gemini-2.5-flash or gemini-2.0-flash)
     for model_name in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
         try:
             response = client.models.generate_content(
@@ -775,10 +793,10 @@ def to_markdown(data: Dict[str, Any]) -> str:
     return md
 
 
-# --- RENDER TOP NAVBAR MATCHING LOCALHOST:3000 ---
+# --- 1. RENDER FULL-WIDTH EDGE-TO-EDGE TOP NAVBAR ---
 st.markdown("""
-<header class="navbar" style="position: relative; margin-bottom: 24px;">
-  <div class="nav-brand">
+<div class="top-navbar-fixed">
+  <div class="nav-brand" style="display: flex; align-items: center; gap: 10px;">
     <div class="brand-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
@@ -786,7 +804,7 @@ st.markdown("""
         <path d="M12 22V12"/>
       </svg>
     </div>
-    <div>
+    <div style="display: flex; align-items: baseline; gap: 6px;">
       <span class="brand-name">iGETIT</span>
       <span class="brand-tag">VR GENERATOR</span>
     </div>
@@ -794,32 +812,27 @@ st.markdown("""
   <div class="nav-links">
     <span class="pill-badge">ECA Framework &bull; 3–5 Page Scope</span>
   </div>
-</header>
-""", unsafe_allow_html=True)
-
-# Main container
-st.markdown("""
-<div class="custom-main-wrapper">
-  <!-- Hero Header -->
-  <section class="hero-header">
-    <h1 class="main-title">iGETIT VR Experience Generator</h1>
-    <p class="main-desc">Convert work instructions and process documentation into implementation-ready VR training experiences.</p>
-  </section>
 </div>
 """, unsafe_allow_html=True)
 
-# Form Section wrapped inside styled container
-content_col = st.container()
 
-with content_col:
-    # Outer Card Wrapper
-    st.markdown('<div class="custom-main-wrapper" style="padding-top: 0;"><div class="st-card-container">', unsafe_allow_html=True)
+# --- 2. HERO HEADER ---
+st.markdown("""
+<div style="text-align: center; margin-bottom: 24px;">
+  <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.8px;">iGETIT VR Experience Generator</h1>
+  <p style="font-size: 16px; color: #64748b; max-width: 680px; margin: 0 auto;">Convert work instructions and process documentation into implementation-ready VR training experiences.</p>
+</div>
+""", unsafe_allow_html=True)
 
-    # 1. Upload Field
+
+# --- 3. UNIFIED CARD CONTAINER ---
+# Using native container with border ensures everything is enclosed in a single card
+with st.container(border=True):
+    # Field 1: Upload
     st.markdown("""
-    <div class="st-field-header">
-      <span>Upload Work Instruction / SOP / Manual</span>
-      <span class="st-field-sub">PDF, PPTX, DOCX, TXT, or images (drag-and-drop or paste screenshot)</span>
+    <div class="field-header">
+      <span class="field-title">Upload Work Instruction / SOP / Manual</span>
+      <span class="field-sub">PDF, PPTX, DOCX, TXT, or images (drag-and-drop or paste screenshot)</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -834,11 +847,11 @@ with content_col:
         with st.spinner("Extracting content from document..."):
             extracted_text = extract_text_from_file(uploaded_file)
 
-    # 2. Source Text Field
+    # Field 2: Source Text
     st.markdown("""
-    <div class="st-field-header" style="margin-top: 20px;">
-      <span>Source text (optional)</span>
-      <span class="st-field-sub">Paste procedure steps or technical specifications directly</span>
+    <div class="field-header" style="margin-top: 18px;">
+      <span class="field-title">Source text (optional)</span>
+      <span class="field-sub">Paste procedure steps or technical specifications directly</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -846,15 +859,15 @@ with content_col:
         "Source text (optional)",
         value=extracted_text,
         placeholder="Paste work instruction, step-by-step assembly procedure, or notes here...",
-        height=140,
+        height=130,
         label_visibility="collapsed"
     )
 
-    # 3. Instruction Field
+    # Field 3: Instruction
     st.markdown("""
-    <div class="st-field-header" style="margin-top: 20px;">
-      <span>Instruction</span>
-      <span class="st-field-sub">Agent direction for VR transformation</span>
+    <div class="field-header" style="margin-top: 18px;">
+      <span class="field-title">Instruction</span>
+      <span class="field-sub">Agent direction for VR transformation</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -864,13 +877,11 @@ with content_col:
         label_visibility="collapsed"
     )
 
-    # 4. Generate Button
+    # Field 4: Action Button
     generate_btn = st.button("▶ Generate VR Experience", type="primary")
 
-    st.markdown('</div></div>', unsafe_allow_html=True)
 
-
-# Processing Logic
+# --- 4. GENERATION PROCESSING ---
 if generate_btn:
     api_key = get_api_key()
     has_input = bool(source_text_val.strip())
@@ -892,17 +903,14 @@ if generate_btn:
                 st.session_state["vr_result"] = result
             except Exception as e:
                 st.error(f"Generation error: {str(e)}")
-                # Use robust fallback so user always sees the manual
                 st.session_state["vr_result"] = offline_fallback_extraction(source_text_val)
 
 
-# Output Presentation - Executive Document
+# --- 5. EXECUTIVE DOCUMENT OUTPUT ---
 if "vr_result" in st.session_state:
     data = st.session_state["vr_result"]
 
-    st.markdown('<div class="custom-main-wrapper" style="padding-top: 0;">', unsafe_allow_html=True)
-
-    # Export toolbar buttons
+    # Export toolbar
     col_d1, col_d2, col_empty = st.columns([1, 1, 2])
     with col_d1:
         st.download_button(
@@ -924,5 +932,3 @@ if "vr_result" in st.session_state:
     # Render Executive Document HTML
     doc_html = render_executive_html(data)
     st.markdown(doc_html, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
