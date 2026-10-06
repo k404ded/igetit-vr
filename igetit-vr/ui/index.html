@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>iGETIT VR Experience Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Convert manufacturing work instructions, SOPs, and manual procedures into implementation-ready iGETIT VR Experience Manuals.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/styles.css">
+
+  <!-- Document Parsing & Export Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navigation / Brand Bar -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+            <path d="m3.3 7 8.7 5 8.7-5"/>
+            <path d="M12 22V12"/>
+          </svg>
+        </div>
+        <div>
+          <span class="brand-name">iGETIT</span>
+          <span class="brand-tag">VR Generator</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <span class="pill-badge">ECA Framework &bull; 3–5 Page Scope</span>
+        <button id="themeToggle" class="icon-btn" title="Toggle theme">
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Hero Header -->
+      <section class="hero-header">
+        <h1 class="main-title">iGETIT VR Experience Generator</h1>
+        <p class="main-desc">Convert work instructions and process documentation into implementation-ready VR training experiences.</p>
+      </section>
+
+      <!-- Input Form Card -->
+      <section class="card input-card" id="inputSection">
+        <!-- Upload Area -->
+        <div class="form-group">
+          <label class="form-label" for="dropZone">
+            <span>Upload Work Instruction / SOP / Manual</span>
+            <span class="label-sub">PDF, PPTX, DOCX, TXT, or images (drag-and-drop or paste screenshot)</span>
+          </label>
+          <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload files">
+            <div class="drop-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                <path d="M12 12v9"/>
+                <path d="m16 16-4-4-4 4"/>
+              </svg>
+            </div>
+            <div class="drop-text">
+              <strong>Drag &amp; drop files here</strong>, or <span class="highlight-link">browse your computer</span>
+            </div>
+            <div class="drop-hint">Supports PDF, PPTX, DOCX, TXT, PNG, JPG, and clipboard screenshots</div>
+            <input id="fileInput" type="file" multiple hidden accept=".pdf,.pptx,.docx,.txt,.md,image/*">
+          </div>
+          <div class="files-container" id="fileList"></div>
+        </div>
+
+        <!-- Pasted Text Accordion / Input -->
+        <div class="form-group">
+          <label class="form-label" for="pastedText">
+            <span>Source text (optional)</span>
+            <span class="label-sub">Paste procedure steps or technical specifications directly</span>
+          </label>
+          <textarea id="pastedText" class="form-textarea" placeholder="Paste work instruction, step-by-step assembly procedure, or notes here..."></textarea>
+        </div>
+
+        <!-- Instruction Input (Pre-populated) -->
+        <div class="form-group">
+          <label class="form-label" for="instructionInput">
+            <span>Instruction</span>
+            <span class="label-sub">Agent direction for VR transformation</span>
+          </label>
+          <input 
+            type="text" 
+            id="instructionInput" 
+            class="form-input" 
+            value="Convert this into a VR Experience Manual for iGETIT."
+            placeholder="Convert this into a VR Experience Manual for iGETIT."
+          >
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+          <button id="generateBtn" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>Generate VR Experience</span>
+          </button>
+        </div>
+
+        <!-- Error Notification -->
+        <div class="alert-error" id="errorMsg" hidden></div>
+      </section>
+
+      <!-- Processing Stage Modal / Section -->
+      <section class="card progress-card" id="progressSection" hidden>
+        <div class="progress-header">
+          <div class="spinner"></div>
+          <div>
+            <h2 class="progress-title">Generating VR Experience...</h2>
+            <p class="progress-subtitle">Transforming source material into structured iGETIT AR/VR Experience Manual</p>
+          </div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+
+        <!-- 9 Core Workflow Stages -->
+        <ul class="stages-list" id="stagesList"></ul>
+      </section>
+
+      <!-- Output Manual Document Section -->
+      <section class="output-section" id="outputSection" hidden>
+        <!-- Document Action Toolbar -->
+        <div class="toolbar-card">
+          <div class="toolbar-info">
+            <span class="status-indicator"></span>
+            <strong>VR Experience Manual Ready</strong>
+          </div>
+          <div class="toolbar-actions">
+            <button id="copyBtn" class="btn btn-secondary" title="Copy markdown to clipboard">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+              <span>Copy Output</span>
+            </button>
+            <button id="downloadPdfBtn" class="btn btn-primary" title="Download formatted PDF">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>Download PDF</span>
+            </button>
+            <button id="downloadDocxBtn" class="btn btn-secondary" title="Download Word document">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              <span>Download DOCX</span>
+            </button>
+            <button id="startNewBtn" class="btn btn-outline" title="Start new generation">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+              <span>Start New</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Rendered Document View -->
+        <div class="card doc-viewer-card" id="docViewer"></div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/ui/app.js"></script>
+</body>
+</html>

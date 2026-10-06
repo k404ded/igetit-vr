@@ -1,0 +1,12 @@
+{
+  "name": "igetit-vr-generator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "iGETIT VR Experience Generator Agent",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
