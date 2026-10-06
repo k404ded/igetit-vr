@@ -4,8 +4,11 @@
 *.env
 !.env.example
 
-# Dependencies
+# Dependencies & Python Cache
 node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
 
 # Logs
 logs/
